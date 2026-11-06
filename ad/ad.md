@@ -15,7 +15,7 @@
 ## 安装
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/<OWNER>/xray-mini/main/xray-mini.sh -o /usr/local/bin/xray-mini
+curl -fsSL https://raw.githubusercontent.com/jasonsms/openwrt-configs/main/xr.sh -o /usr/local/bin/xray-mini
 chmod +x /usr/local/bin/xray-mini
 xray-mini install --port 8443 --ext-port 8443
 ```
@@ -28,7 +28,7 @@ xray-mini install --port 8443 --ext-port 8443
 已经下载到本地时也可以直接执行：
 
 ```sh
-sh xray-mini.sh install --port 8443 --ext-port 8443
+sh xr.sh install --port 8443 --ext-port 8443
 ```
 
 安装脚本会把自身复制到 `/usr/local/bin/xray-mini`，后续可直接用管理命令。
