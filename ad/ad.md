@@ -65,6 +65,47 @@ Alpine 3.24 / 64MB cgroup / 1 vCPU：
 | 4 路并发共 40MB 下载 | ~21 MB | ~34 MB |
 
 安装阶段峰值更高，脚本已改为流式取二进制以降低峰值。
+#!/bin/sh
+mb() { awk -v n="$1" 'BEGIN{printf "%.1f", n/1048576}'; }
+
+while true; do
+    clear
+    LIMIT=$(cat /sys/fs/cgroup/memory.max 2>/dev/null)
+    CUR=$(cat /sys/fs/cgroup/memory.current 2>/dev/null)
+    ANON=$(awk '/^anon /{print $2}' /sys/fs/cgroup/memory.stat)
+    FILE=$(awk '/^file /{print $2}' /sys/fs/cgroup/memory.stat)
+    INACT=$(awk '/^inactive_file /{print $2}' /sys/fs/cgroup/memory.stat)
+    KERN=$(awk '/^kernel /{print $2}' /sys/fs/cgroup/memory.stat)
+    SWAP=$(cat /sys/fs/cgroup/memory.swap.current 2>/dev/null)
+    SWAPMAX=$(cat /sys/fs/cgroup/memory.swap.max 2>/dev/null)
+    REAL=$((ANON + KERN))
+    PID=$(pidof xray 2>/dev/null)
+
+    if [ "$LIMIT" = "max" ]; then
+        LIMIT_MB="unlimited"; PCT="n/a"
+    else
+        LIMIT_MB=$(mb "$LIMIT")
+        PCT=$(awk -v u="$REAL" -v l="$LIMIT" 'BEGIN{if(l>0) printf "%.1f", u/l*100; else print "n/a"}')
+    fi
+
+    echo "===== $(date '+%F %T') ====="
+    echo "限额        : ${LIMIT_MB} MB"
+    echo "current     : $(mb "$CUR") MB  (含缓存，不代表真实占用)"
+    echo "真实占用    : $(mb "$REAL") MB  (${PCT}%)"
+    echo "  anon      : $(mb "$ANON") MB"
+    echo "  kernel    : $(mb "$KERN") MB"
+    echo "  file 缓存 : $(mb "$FILE") MB  (inactive $(mb "$INACT") MB 可回收)"
+    echo "swap        : $(mb "$SWAP") / $(mb "$SWAPMAX") MB"
+    echo "压力        : $(awk '/^some/{print $2, $3, $4}' /sys/fs/cgroup/memory.pressure)"
+    echo "oom_kill    : $(awk '/^oom_kill/{print $2}' /sys/fs/cgroup/memory.events)"
+    echo
+    if [ -n "$PID" ]; then
+        echo "xray pid=$PID  $(awk '/^VmRSS:/{print $2" "$3}' /proc/$PID/status)  匿名=$(awk '/^Anonymous:/{print $2" "$3}' /proc/$PID/smaps_rollup)"
+    fi
+    echo
+    ps -o pid,rss,comm 2>/dev/null | sort -k2 -nr | head -6
+    sleep 2
+done
 
 ## License
 
