@@ -66,7 +66,9 @@ Alpine 3.24 / 64MB cgroup / 1 vCPU：
 
 安装阶段峰值更高，脚本已改为流式取二进制以降低峰值。
 
-`监控脚本：
+监控脚本：
+```sh
+
 #!/bin/sh
 mb() { awk -v n="$1" 'BEGIN{printf "%.1f", n/1048576}'; }
 
@@ -108,7 +110,8 @@ while true; do
     ps -o pid,rss,comm 2>/dev/null | sort -k2 -nr | head -6
     sleep 2
 done
-`
+```
+
 ## License
 
 MIT
