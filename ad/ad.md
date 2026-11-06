@@ -65,6 +65,8 @@ Alpine 3.24 / 64MB cgroup / 1 vCPU：
 | 4 路并发共 40MB 下载 | ~21 MB | ~34 MB |
 
 安装阶段峰值更高，脚本已改为流式取二进制以降低峰值。
+
+监控脚本：
 #!/bin/sh
 mb() { awk -v n="$1" 'BEGIN{printf "%.1f", n/1048576}'; }
 
